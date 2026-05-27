@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Kyykky100" />
+  <meta name="theme-color" content="#0d0d0d" />
+  <title>KYYKKY100</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d0d0d;
+      --bg2: #141414;
+      --bg3: #1e1e1e;
+      --border: #2a2a2a;
+      --accent: #ff6b35;
+      --accent-dim: #1a0a00;
+      --text: #f0ece4;
+      --muted: #555;
+      --muted2: #888;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Courier New', monospace;
+      min-height: 100vh;
+      max-width: 420px;
+      margin: 0 auto;
+      padding-bottom: 40px;
+    }
+    .header {
+      padding: 36px 24px 20px;
+      border-bottom: 1px solid var(--border);
+      background: radial-gradient(ellipse at 10% 0%, #1a0a00 0%, var(--bg) 70%);
+    }
+    .header-label { font-size: 10px; letter-spacing: 4px; color: var(--accent); text-transform: uppercase; }
+    .header-title { font-size: 32px; font-weight: bold; letter-spacing: -1px; margin-top: 4px; }
+    .header-title span { color: var(--accent); }
+    .header-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; border-bottom: 1px solid var(--border); }
+    .stat { padding: 16px 10px; text-align: center; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: none; }
+    .stat-val { font-size: 22px; font-weight: bold; }
+    .stat-val.accent { color: var(--accent); }
+    .stat-label { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+
+    .section { padding: 20px 24px 0; }
+    .section-label { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+
+    .progress-bar-bg { height: 4px; background: var(--bg3); border-radius: 2px; }
+    .progress-bar-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--accent), #ffaa70); transition: width 0.5s ease; }
+    .progress-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .progress-pct { font-size: 10px; color: var(--accent); }
+
+    .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: 12px; }
+    .day-cell {
+      aspect-ratio: 1; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: bold;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+    .day-cell.done { background: var(--accent); color: var(--bg); }
+    .day-cell.today { background: var(--bg3); color: var(--accent); border-color: var(--accent); }
+    .day-cell.past { background: var(--bg2); color: #333; }
+    .day-cell.future { background: var(--bg2); color: #2a2a2a; opacity: 0.4; }
+
+    .card {
+      margin: 20px 24px 0;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      padding: 18px 20px;
+    }
+    .card-title { font-size: 10px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
+    .card-row { display: flex; gap: 16px; flex-wrap: wrap; }
+    .card-row span { font-size: 13px; color: var(--muted2); }
+
+    .btn-log {
+      display: block; width: calc(100% - 48px); margin: 20px 24px 0;
+      padding: 16px; background: var(--accent-dim);
+      border: 1px solid var(--accent); border-radius: 8px;
+      color: var(--accent); font-family: monospace; font-weight: bold;
+      font-size: 14px; cursor: pointer; letter-spacing: 2px;
+      text-transform: uppercase; text-align: center;
+    }
+    .btn-log:active { opacity: 0.8; }
+
+    .form-group { margin-bottom: 14px; }
+    .form-label { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 6px; }
+    .form-input {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 4px;
+      color: var(--text); font-family: monospace; font-size: 14px;
+      padding: 10px 12px; width: 100%; outline: none;
+    }
+    .form-input:focus { border-color: var(--accent); }
+
+    .feeling-row { display: flex; gap: 8px; }
+    .feeling-btn {
+      flex: 1; padding: 9px 4px; border-radius: 4px; border: 1px solid var(--border);
+      background: var(--bg); color: var(--muted);
+      font-family: monospace; font-size: 11px; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .feeling-btn.active { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); }
+
+    .btn-row { display: flex; gap: 8px; margin-top: 18px; }
+    .btn-save {
+      flex: 1; padding: 13px; border-radius: 4px;
+      background: var(--accent); border: none; color: var(--bg);
+      font-family: monospace; font-weight: bold; font-size: 13px;
+      cursor: pointer; letter-spacing: 1px;
+    }
+    .btn-cancel {
+      padding: 13px 16px; border-radius: 4px;
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      font-family: monospace; font-size: 13px; cursor: pointer;
+    }
+
+    .history { padding: 20px 24px 0; }
+    .history-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 0; border-bottom: 1px solid #1a1a1a;
+    }
+    .history-date { font-size: 12px; color: var(--muted2); }
+    .history-right { display: flex; gap: 12px; align-items: center; }
+    .history-time { font-size: 12px; color: var(--muted); }
+    .history-check { font-size: 12px; color: var(--accent); font-weight: bold; }
+
+    .pwa-hint {
+      margin: 24px 24px 0;
+      padding: 12px 16px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .pwa-hint strong { color: var(--muted2); }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-label">30 päivää, 3000 kyykkyä</div>
+  <div class="header-title">KYYKKY<span>100</span></div>
+  <div class="header-sub" id="headerSub"></div>
+</div>
+
+<div class="stats-row">
+  <div class="stat">
+    <div class="stat-val accent" id="statStreak">0pv</div>
+    <div class="stat-label">putki</div>
+  </div>
+  <div class="stat">
+    <div class="stat-val" id="statDone">0/30</div>
+    <div class="stat-label">tehty</div>
+  </div>
+  <div class="stat">
+    <div class="stat-val" id="statAvg">–</div>
+    <div class="stat-label">keskim.</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="progress-header">
+    <div class="section-label" style="margin-bottom:0">edistyminen</div>
+    <div class="progress-pct" id="progressPct">0%</div>
+  </div>
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
+</div>
+
+<div class="section">
+  <div class="section-label">päiväkalenteri</div>
+  <div class="grid" id="dayGrid"></div>
+</div>
+
+<div id="actionArea"></div>
+
+<div class="history" id="historySection" style="display:none">
+  <div class="section-label">historia</div>
+  <div id="historyList"></div>
+</div>
+
+<div class="pwa-hint" id="pwaHint" style="display:none">
+  📱 <strong>Lisää kotinäytölle:</strong> Safari → Jaa-painike → "Lisää Koti-valikkoon"
+</div>
+
+<script>
+  const START_DATE = "2026-05-28";
+  const TOTAL_DAYS = 30;
+  const MONTHS = ["tammi","helmi","maalis","huhti","touko","kesä","heinä","elo","syys","loka","marras","joulu"];
+
+  function getTodayStr() { return new Date().toISOString().slice(0,10); }
+  function formatDate(s) { const d=new Date(s); return `${d.getDate()}. ${MONTHS[d.getMonth()]}`; }
+
+  function getLogs() {
+    try { return JSON.parse(localStorage.getItem("kyykky100-logs") || "{}"); } catch { return {}; }
+  }
+  function saveLogs(logs) { localStorage.setItem("kyykky100-logs", JSON.stringify(logs)); }
+
+  function calcStreak(logs) {
+    let s=0, d=new Date(getTodayStr());
+    while(true) {
+      const k = d.toISOString().slice(0,10);
+      if(logs[k]?.done) { s++; d.setDate(d.getDate()-1); } else break;
+    }
+    return s;
+  }
+
+  function calcAvg(logs) {
+    const times = Object.values(logs).filter(l=>l.time).map(l=>{
+      const [m,s]=(l.time||"0:0").split(":").map(Number); return m*60+s;
+    });
+    if(!times.length) return null;
+    const avg = times.reduce((a,b)=>a+b,0)/times.length;
+    return `${Math.floor(avg/60)}:${String(Math.round(avg%60)).padStart(2,"0")}`;
+  }
+
+  function daysSinceStart() {
+    const start = new Date(START_DATE), now = new Date(getTodayStr());
+    return Math.max(1, Math.floor((now-start)/86400000)+1);
+  }
+
+  function render() {
+    const logs = getLogs();
+    const today = getTodayStr();
+    const todayLog = logs[today];
+    const totalDone = Object.values(logs).filter(l=>l.done).length;
+    const streak = calcStreak(logs);
+    const avg = calcAvg(logs);
+    const pct = Math.min(Math.round((totalDone/TOTAL_DAYS)*100),100);
+    const dayNum = daysSinceStart();
+
+    // Header
+    document.getElementById("headerSub").textContent = `Alkanut 28.5.2026 · 30 vrk · 100 kyykkyä/pv`;
+
+    // Stats
+    document.getElementById("statStreak").textContent = streak+"pv";
+    document.getElementById("statStreak").className = "stat-val" + (streak>=7?" accent":"");
+    document.getElementById("statDone").textContent = totalDone+"/"+TOTAL_DAYS;
+    document.getElementById("statAvg").textContent = avg||"–";
+    document.getElementById("progressPct").textContent = pct+"%";
+    document.getElementById("progressBar").style.width = pct+"%";
+
+    // Grid
+    const grid = document.getElementById("dayGrid");
+    grid.innerHTML = "";
+    for(let i=0;i<TOTAL_DAYS;i++) {
+      const d = new Date(START_DATE); d.setDate(d.getDate()+i);
+      const key = d.toISOString().slice(0,10);
+      const log = logs[key];
+      const cell = document.createElement("div");
+      cell.className = "day-cell " + (log?.done?"done":key===today?"today":key<today?"past":"future");
+      cell.textContent = i+1;
+      if(key===today && !todayLog) cell.onclick = ()=>showForm();
+      grid.appendChild(cell);
+    }
+
+    // Action area
+    const area = document.getElementById("actionArea");
+    if(todayLog) {
+      area.innerHTML = `
+        <div class="card">
+          <div class="card-title">tänään – päivä ${dayNum} ✓</div>
+          <div class="card-row">
+            ${todayLog.time?`<span>⏱ ${todayLog.time}</span>`:""}
+            ${todayLog.feeling?`<span>${{easy:"😌 helppo",ok:"💪 ok",hard:"🔥 raskas"}[todayLog.feeling]}</span>`:""}
+            ${todayLog.sets?`<span>📋 ${todayLog.sets}</span>`:""}
+          </div>
+        </div>`;
+    } else {
+      area.innerHTML = `<button class="btn-log" onclick="showForm()">+ Kirjaa tänään</button>`;
+    }
+
+    // History
+    const entries = Object.entries(logs).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,10);
+    if(entries.length) {
+      document.getElementById("historySection").style.display="block";
+      document.getElementById("historyList").innerHTML = entries.map(([date,log])=>`
+        <div class="history-item">
+          <span class="history-date">${formatDate(date)}</span>
+          <div class="history-right">
+            ${log.time?`<span class="history-time">${log.time}</span>`:""}
+            ${log.feeling?`<span>${{easy:"😌",ok:"💪",hard:"🔥"}[log.feeling]}</span>`:""}
+            <span class="history-check">✓</span>
+          </div>
+        </div>`).join("");
+    }
+
+    // PWA hint for iOS
+    const isIOS = /iphone|ipad/i.test(navigator.userAgent);
+    const isStandalone = window.navigator.standalone;
+    if(isIOS && !isStandalone) document.getElementById("pwaHint").style.display="block";
+  }
+
+  function showForm() {
+    const area = document.getElementById("actionArea");
+    area.innerHTML = `
+      <div class="card">
+        <div class="card-title">kirjaa päivä ${daysSinceStart()}</div>
+        <div class="form-group">
+          <label class="form-label">aika (mm:ss)</label>
+          <input id="fTime" class="form-input" type="text" placeholder="esim. 1:48" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">fiilis</label>
+          <div class="feeling-row">
+            <button class="feeling-btn" id="f-easy" onclick="setFeeling('easy')">😌 helppo</button>
+            <button class="feeling-btn active" id="f-ok" onclick="setFeeling('ok')">💪 ok</button>
+            <button class="feeling-btn" id="f-hard" onclick="setFeeling('hard')">🔥 raskas</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">erät (vapaaehtoinen)</label>
+          <input id="fSets" class="form-input" type="text" placeholder="esim. 60+40 tai 100 putkeen" />
+        </div>
+        <div class="btn-row">
+          <button class="btn-save" onclick="saveLog()">✓ KIRJAA TEHTY</button>
+          <button class="btn-cancel" onclick="render()">✕</button>
+        </div>
+      </div>`;
+    window._feeling = "ok";
+  }
+
+  function setFeeling(v) {
+    window._feeling = v;
+    ["easy","ok","hard"].forEach(f=>{
+      document.getElementById("f-"+f).className = "feeling-btn"+(f===v?" active":"");
+    });
+  }
+
+  function saveLog() {
+    const logs = getLogs();
+    logs[getTodayStr()] = {
+      done: true,
+      time: document.getElementById("fTime").value.trim(),
+      feeling: window._feeling||"ok",
+      sets: document.getElementById("fSets").value.trim()
+    };
+    saveLogs(logs);
+    render();
+  }
+
+  render();
+</script>
+</body>
+</html>
